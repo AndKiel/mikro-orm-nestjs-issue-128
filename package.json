@@ -7,6 +7,7 @@
     "compile": "tsc",
     "build": "ncc build --out dist --source-map ./reproduction.ts",
     "run:ts-node": "yarn ts-node ./reproduction.ts",
+    "run:ts-node:alt": "yarn ts-node ./reproduction-alt.ts",
     "run:built": "node ./dist/index.js"
   },
   "resolutions": {
