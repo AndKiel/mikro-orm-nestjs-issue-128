@@ -6,6 +6,7 @@
   "scripts": {
     "compile": "tsc",
     "build": "ncc build --out dist --source-map ./reproduction.ts",
+    "build:alt": "ncc build --out dist --source-map ./reproduction-alt.ts",
     "run:ts-node": "yarn ts-node ./reproduction.ts",
     "run:ts-node:alt": "yarn ts-node ./reproduction-alt.ts",
     "run:built": "node ./dist/index.js"
@@ -27,9 +28,9 @@
     "tslib": "2.6.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "10.1.4",
+    "@nestjs/cli": "10.1.10",
     "@nestjs/schematics": "10.0.1",
-    "@nestjs/testing": "10.0.5",
+    "@nestjs/testing": "10.1.0",
     "@types/node": "18.16.19",
     "@vercel/ncc": "0.36.1",
     "ts-node": "10.9.1",

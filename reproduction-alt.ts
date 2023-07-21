@@ -18,10 +18,10 @@ export class MongoEntity extends BaseEntity<MongoEntity, "id"> {
 
 @Injectable()
 export class MongoService {
-  constructor(@InjectRepository(MongoEntity) private readonly repository: EntityRepository<MongoEntity>) {}
+  constructor(@InjectRepository(MongoEntity) public readonly repository: EntityRepository<MongoEntity>) {}
 }
 
-@Module({ providers: [MongoService] })
+@Module({ imports: [MikroOrmModule.forFeature([MongoEntity])], providers: [MongoService] })
 export class MongoModule {}
 
 @Module({
@@ -34,13 +34,15 @@ export class MongoModule {}
 
         return {
           type: "mongo",
-          clientUrl: "mongodb://127.0.0.1:27017/dbName", // run a local dockerized MongoDB v3 instance
+          clientUrl: "mongodb://127.0.0.1:27017/dbName", // local dockerized MongoDB v3 instance
           dbName: "dbName",
           entities: [MongoEntity],
           debug: ["query"], // Log all queries
           logger: message => logger.info(message),
         };
       },
+      // If scope is not passed, using repository throws ValidationError
+      scope: Scope.REQUEST,
     }),
     MongoModule,
   ],
@@ -53,7 +55,15 @@ if (require.main === module) {
   (async () => {
     applicationContext = await NestFactory.createApplicationContext(AppModule);
     applicationContext = await applicationContext.init();
-    await applicationContext.resolve(MongoService);
+    // If scope is passed to MikroOrmModule.forRootAsync, applicationContext.get works but repository is undefined
+    // .resolve must be used instead
+    const mongoService = await applicationContext.resolve(MongoService);
+    await mongoService.repository.findAll(); // With scope it works
+
+    // With scope each resolved new MongoService instance gets EntityManager with _id incremented by 1
+    console.info("EntityManager _id is %d", (await applicationContext.resolve(MongoService)).repository.getEntityManager()._id)
+    console.info("EntityManager _id is %d", (await applicationContext.resolve(MongoService)).repository.getEntityManager()._id)
+
     await applicationContext.close();
     process.exit(0)
   })().catch(async error => {
